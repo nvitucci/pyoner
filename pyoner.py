@@ -1,47 +1,7 @@
 import sys, rdflib, re
+import checkProfile
 from rdflib import OWL, RDFS, RDF
 from pyke import knowledge_engine
-
-def checkIfOWLLD(ss, ps, os):
-  forbiddenPredicates = [
-    OWL['complementOf'],
-    OWL['disjointUnionOf'],
-    OWL['intersectionOf'],
-    OWL['unionOf'],
-    OWL['oneOf'],
-    OWL['allValuesFrom'],
-    OWL['hasSelf'],
-    OWL['hasValue'],
-    OWL['someValuesFrom'],
-    OWL['cardinality'],
-    OWL['maxCardinality'],
-    OWL['minCardinality'],
-    OWL['qualifiedMaxCardinality'],
-    OWL['qualifiedMinCardinality'],
-    OWL['qualifiedCardinality'],
-    OWL['hasKey'],
-    OWL['propertyChainAxiom'],
-    OWL['AllDifferent'],
-    OWL['AllDisjointClasses'],
-    OWL['AllDisjointProperties'],
-    OWL['sourceIndividual'],
-    OWL['assertionProperty'],
-    OWL['targetIndividual'],
-    OWL['targetValue'],
-    OWL['ReflexiveProperty']
-  ]
-
-  matchingPredicates = []
-
-  for fp in forbiddenPredicates:
-    if fp in ps or fp in os:
-      matchingPredicates.append(fp)
-      # raise OntologyNotOWLLD('Ontology not in the OWL-LD profile because of axiom ' + fp)
-
-  if len(matchingPredicates):
-    return (False, matchingPredicates)
-  else:
-    return (True, [])
 
 def triple_with_ns(t, nsmgr):
     t_ns = []
@@ -102,11 +62,7 @@ for t in g_inf:
 
 # Check if the ontology is in OWL-LD, if not "correct" it
 
-ss = set(g.subjects())
-ps = set(g.predicates())
-os = set(g.objects())
-
-if not checkIfOWLLD(ss, ps, os)[0]:
+if not checkProfile.checkIfOWLLD(g)[0]:
 	# raise Exception('Ontology not in OWL-LD!')
 	toRem = []
 	for t in g:
@@ -115,12 +71,6 @@ if not checkIfOWLLD(ss, ps, os)[0]:
 
 	for r in toRem:
 		g.remove(r)
-
-# g.commit()
-
-ss = set(g.subjects())
-ps = set(g.predicates())
-os = set(g.objects())
 
 # Write to temp file
 
