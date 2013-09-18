@@ -70,6 +70,37 @@
 
 
 
+###  http://www.example.org/test.ttl#ClassD
+
+:ClassD rdf:type owl:Class .
+
+
+
+###  http://www.example.org/test.ttl#ClassE
+
+:ClassE rdf:type owl:Class .
+
+
+
+###  http://www.example.org/test.ttl#ClassF
+
+:ClassF rdf:type owl:Class .
+
+
+
+###  http://www.example.org/test.ttl#ClassG
+
+:ClassG rdf:type owl:Class ;
+        
+        owl:equivalentClass [ rdf:type owl:Class ;
+                              owl:intersectionOf ( :ClassD
+                                                   :ClassE
+                                                   :ClassF
+                                                 )
+                            ] .
+
+
+
 
 
 #################################################################
