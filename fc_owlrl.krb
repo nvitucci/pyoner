@@ -502,6 +502,8 @@ scm_avf2
 	assert
 		ontology.triple($c2, "rdfs:subClassOf", $c1)
 
+# scm_int is decomposed into two helper rules
+
 scm_int_1
 	foreach
 		ontology.triple($c, "owl:intersectionOf", $x)
@@ -531,7 +533,22 @@ scm_int_2
 #     ontology.triple($c, "rdfs:subClassOf", $e2)
 #     ontology.triple($c, "rdfs:subClassOf", $e3)
 
-# scm_uni TODO
+# scm_uni is decomposed into two helper rules
+
+scm_uni_1
+	foreach
+		ontology.triple($c, "owl:unionOf", $x)
+	assert
+		ontology.triple($c, "pyoner:_unionOf", $x)
+
+scm_uni_2
+	foreach
+		ontology.triple($c, "pyoner:_unionOf", $x)
+ 		ontology.triple($x, "rdf:first", $e1)
+ 		ontology.triple($x, "rdf:rest", $z2) 
+	assert
+		ontology.triple($e1, "rdfs:subClassOf", $c)
+ 		ontology.triple($c, "pyoner:_unionOf", $z2)
 
 # The Semantics of Datatypes --- TODO
 

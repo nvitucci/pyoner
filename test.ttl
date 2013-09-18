@@ -101,6 +101,44 @@
 
 
 
+###  http://www.example.org/test.ttl#ClassH
+
+:ClassH rdf:type owl:Class .
+
+
+
+###  http://www.example.org/test.ttl#ClassI
+
+:ClassI rdf:type owl:Class .
+
+
+
+###  http://www.example.org/test.ttl#ClassJ
+
+:ClassJ rdf:type owl:Class .
+
+
+
+###  http://www.example.org/test.ttl#ClassK
+
+:ClassK rdf:type owl:Class .
+
+
+
+###  http://www.example.org/test.ttl#ClassL
+
+:ClassL rdf:type owl:Class ;
+        
+        owl:equivalentClass [ rdf:type owl:Class ;
+                              owl:unionOf ( :ClassH
+                                            :ClassI
+                                            :ClassJ
+                                            :ClassK
+                                          )
+                            ] .
+
+
+
 
 
 #################################################################
