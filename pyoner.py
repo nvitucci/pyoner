@@ -14,9 +14,6 @@ def triple_with_ns(t, nsmgr):
 			t_ns.append('"' + e.toPython() + '"')
 	return tuple(t_ns)
 
-# ont = open('/home/nick/work/ontoforce/ontologies/public/v2/ontoforce_integration_ont_v2.ttl', 'r')
-# ont_inf = open('/tmp/inf_ont.ttl')
-
 # ont = open('test.ttl', 'r')
 if len(sys.argv) > 3:
 	profile = sys.argv[3]
@@ -80,43 +77,6 @@ if profile == 'LD':
 
 		for r in toRem:
 			g.remove(r)
-
-# Write to temp file
-
-# tmp = open('ontology.kfb', 'w')
-
-# for t in g:														
-# 	nt = []
-# 	for i in t:
-# 		if type(i) == rdflib.term.URIRef:
-# 			nt.append(g.namespace_manager.normalizeUri(i))
-# 		elif type(i) == rdflib.term.Literal:
-# 			nt.append('"' + i + '"')
-# 	tmp.write('triple(\'' + nt[0] + '\', \'' + nt[1] + '\', \'' + nt[2] + '\')\n')
-# 
-# tmp.close()
-# 
-# engine = knowledge_engine.engine('.')
-# engine.activate('fc_owlld')
-# 
-# kb = engine.get_kb('ontology')
-# # kb.dump_specific_facts()
-# 
-# triples = kb.engine.knowledge_bases['ontology'].entity_lists['triple']
-# 
-# g2 = rdflib.Graph()
-# g2.namespace_manager = nsmgr
-# 
-# namespaces = {}
-# for n in g.namespaces():
-# 	namespaces[n[0]] = rdflib.Namespace(n[1])
-# 
-# if 'owl' not in namespaces.keys():
-# 	namespaces['owl'] = OWL
-# if 'rdfs' not in namespaces.keys():
-# 	namespaces['rdfs'] = RDFS
-# if 'rdf' not in namespaces.keys():
-# 	namespaces['rdf'] = RDF
 
 # Assert facts in PyKE
 
