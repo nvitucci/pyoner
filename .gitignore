@@ -1,3 +1,5 @@
+.*
+!/.gitignore
 compiled_krb/
 *.pyc
 *.xml

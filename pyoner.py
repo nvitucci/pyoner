@@ -4,18 +4,27 @@ from rdflib import OWL, RDFS, RDF
 from pyke import knowledge_engine
 
 def triple_with_ns(t, nsmgr):
-    t_ns = []
-    for e in t:
-        if type(e) == rdflib.URIRef:
-            t_ns.append(nsmgr.normalizeUri(e))
-        else:
-            t_ns.append('"' + e.toPython() + '"')
-    return tuple(t_ns)
+	t_ns = []
+	for e in t:
+		if type(e) == rdflib.URIRef:
+			t_ns.append(nsmgr.normalizeUri(e))
+		elif type(e) == rdflib.BNode:
+			t_ns.append('_' + e.toPython())		
+		else:
+			t_ns.append('"' + e.toPython() + '"')
+	return tuple(t_ns)
 
 # ont = open('/home/nick/work/ontoforce/ontologies/public/v2/ontoforce_integration_ont_v2.ttl', 'r')
 # ont_inf = open('/tmp/inf_ont.ttl')
 
 # ont = open('test.ttl', 'r')
+if len(sys.argv) > 3:
+	profile = sys.argv[3]
+else:
+	profile = 'LD'
+
+print 'Chosen profile: ' + profile
+
 ont = open(sys.argv[1], 'r')
 g = rdflib.Graph()
 g.parse(file=ont, format='turtle')
@@ -57,20 +66,20 @@ for t in g:
 for t in g_inf:
 	t_inf_set.add(triple_with_ns(t, nsmgr))
 
-# nsmgr = rdflib.namespace.NamespaceManager(rdflib.Graph())
-# g.namespace_manager = nsmgr
-
 # Check if the ontology is in OWL-LD, if not "correct" it
 
-if not checkProfile.checkIfOWLLD(g)[0]:
-	# raise Exception('Ontology not in OWL-LD!')
-	toRem = []
-	for t in g:
-		if type(t[0]) == rdflib.term.BNode or type(t[1]) == rdflib.term.BNode or type (t[2]) == rdflib.term.BNode:
-			toRem.append(t)
+if profile == 'LD':
+	if not checkProfile.checkIfOWLLD(g)[0]:
+		# raise Exception('Ontology not in OWL-LD!')
 
-	for r in toRem:
-		g.remove(r)
+		# only removes blank nodes
+		toRem = []
+		for t in g:
+			if type(t[0]) == rdflib.term.BNode or type(t[1]) == rdflib.term.BNode or type (t[2]) == rdflib.term.BNode:
+				toRem.append(t)
+
+		for r in toRem:
+			g.remove(r)
 
 # Write to temp file
 
@@ -117,7 +126,11 @@ for t in t_set:
 
 # Run inference
 
-engine.activate('fc_owlld')
+if profile == 'LD':
+	engine.activate('fc_owlld')
+elif profile == 'RL':
+	engine.activate('fc_owlrl')
+
 triples = engine.knowledge_bases['ontology'].entity_lists['triple'].case_specific_facts
 
 # Build set with inference results
@@ -137,11 +150,12 @@ for t in triples:
 	for f in t:
 		try:                                                      
 			converted_triple_array.append(rdflib.util.to_term(f))
+			# print f + ' ---> ' + str(type(rdflib.util.to_term(f)))
 		except:
 			# a = re.compile("^[a-zA-Z0-9]+:.*$")
-			a = re.compile("^[^:]+:.*$")
+			ns_re = re.compile("^[^:]+:.*$")
 
-			if a.match(f):
+			if ns_re.match(f):
 				ns = f.split(':')[0]
 				e = f.split(':')[1]
 				converted_triple_array.append(namespaces[ns] + str(e))
