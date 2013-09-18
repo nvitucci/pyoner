@@ -500,9 +500,36 @@ scm_avf2
 		ontology.triple($c2, "owl:onProperty", $p2)
 		ontology.triple($p1, "rdfs:subPropertyOf", $p2)
 	assert
-		ontology.triple($c2, "rdfs:subClassOf", $c1) 
+		ontology.triple($c2, "rdfs:subClassOf", $c1)
 
-# scm_int TODO
+scm_int_1
+	foreach
+		ontology.triple($c, "owl:intersectionOf", $x)
+	assert
+		ontology.triple($c, "pyoner:_intersectionOf", $x)
+
+scm_int_2
+	foreach
+		ontology.triple($c, "pyoner:_intersectionOf", $x)
+ 		ontology.triple($x, "rdf:first", $e1)
+ 		ontology.triple($x, "rdf:rest", $z2) 
+	assert
+		ontology.triple($c, "rdfs:subClassOf", $e1)
+ 		ontology.triple($c, "pyoner:_intersectionOf", $z2)
+
+# scm_int
+#   foreach
+#     ontology.triple($c, "owl:intersectionOf", $x) 
+#     ontology.triple($x, "rdf:first", $e1)
+#     ontology.triple($x, "rdf:rest", $z2) 
+#     ontology.triple($z2, "rdf:first", $e2)
+#     ontology.triple($z2, "rdf:rest", $z3) 
+#     ontology.triple($z3, "rdf:first", $e3)
+#     ontology.triple($z3, "rdf:rest", "rdf:nil")
+#   assert
+#     ontology.triple($c, "rdfs:subClassOf", $e1)
+#     ontology.triple($c, "rdfs:subClassOf", $e2)
+#     ontology.triple($c, "rdfs:subClassOf", $e3)
 
 # scm_uni TODO
 

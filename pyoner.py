@@ -106,6 +106,7 @@ g_new.namespace_manager = nsmgr
 
 for t in triples:
 	converted_triple_array = []
+	to_exclude = False
 
 	for f in t:
 		try:                                                      
@@ -117,11 +118,16 @@ for t in triples:
 
 			if ns_re.match(f):
 				ns = f.split(':')[0]
-				e = f.split(':')[1]
-				converted_triple_array.append(namespaces[ns] + str(e))
 
-	converted_triple = tuple(converted_triple_array)
-	g_new.add(converted_triple)
+				if ns == 'pyoner':
+					to_exclude = True
+				else:
+					e = f.split(':')[1]
+					converted_triple_array.append(namespaces[ns] + str(e))
+
+	if not to_exclude:
+		converted_triple = tuple(converted_triple_array)
+		g_new.add(converted_triple)
 
 ont_pyke = open(sys.argv[2], 'w')
 ont_pyke.write(g_new.serialize(format='turtle'))
