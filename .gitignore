@@ -1,0 +1,4 @@
+compiled_krb/
+*.xml
+*.ttl
+!test.ttl

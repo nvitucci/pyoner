@@ -1,0 +1,312 @@
+# Rules for the OWL-LD profile
+
+# The Semantics of Equality
+
+# eq_ref
+# 	foreach
+# 		ontology.triple($s, $p, $o)
+# 	assert
+# 		ontology.triple($s, "owl:sameAs", $s)
+# 		ontology.triple($p, "owl:sameAs", $p)
+# 		ontology.triple($o, "owl:sameAs", $o)
+
+eq_sym
+	foreach
+		ontology.triple($x, "owl:sameAs", $y)
+	assert
+		ontology.triple($y, "owl:sameAs", $x)
+
+eq_trans
+	foreach
+		ontology.triple($x, "owl:sameAs", $y)
+		ontology.triple($y, "owl:sameAs", $z)
+	assert
+		ontology.triple($x, "owl:sameAs", $z)
+
+eq_rep_s
+	foreach
+		ontology.triple($s1, "owl:sameAs", $s2)
+		ontology.triple($s1, $p, $o)
+	assert
+		ontology.triple($s2, $p, $o)
+
+eq_rep_p
+	foreach
+		ontology.triple($p1, "owl:sameAs", $p2)
+		ontology.triple($s, $p1, $o)
+	assert
+		ontology.triple($s, $p2, $o)
+
+eq_rep_o
+	foreach
+		ontology.triple($o1, "owl:sameAs", $o2)
+		ontology.triple($s, $p, $o1)
+	assert
+		ontology.triple($s, $p, $o2)
+
+eq_diff1
+	foreach
+		ontology.triple($x, "owl:sameAs", $y)
+		ontology.triple($x, "owl:differentFrom", $y)
+	assert
+		python inconsistency(context, rule)
+
+# The Semantics of Axioms about Properties
+
+# prp_ap ???
+#		assert
+#			ontology.triple(ap, "rdf:type", "owl:AnnotationProperty") # for each built_in annotation property of OWL 2 RL
+
+prp_dom
+	foreach
+		ontology.triple($p, "rdfs:domain", $c)
+		ontology.triple($x, $p, $y)
+	assert
+		ontology.triple($x, "rdf:type", $c)
+
+prp_rng
+	foreach
+		ontology.triple($p, "rdfs:range", $c)
+		ontology.triple($x, $p, $y)
+	assert
+		ontology.triple($y, "rdf:type", $c)
+
+prp_fp
+	foreach
+		ontology.triple($p, "rdf:type", "owl:FunctionalProperty")
+		ontology.triple($x, $p, $y1)
+		ontology.triple($x, $p, $y2)
+	assert
+		ontology.triple($y1, "owl:sameAs", $y2)
+
+prp_ifp
+	foreach
+		ontology.triple($p, "rdf:type", "owl:InverseFunctionalProperty")
+		ontology.triple($x1, $p, $y)
+		ontology.triple($x2, $p, $y)
+	assert
+		ontology.triple($x1, "owl:sameAs", $x2)
+
+prp_irp
+	foreach
+		ontology.triple($p, "rdf:type", "owl:IrreflexiveProperty")
+		ontology.triple($x, $p, $x)
+	assert
+		python inconsistency(context, rule)
+
+prp_symp
+	foreach
+		ontology.triple($p, "rdf:type", "owl:SymmetricProperty")
+		ontology.triple($x, $p, $y)
+	assert
+		ontology.triple($y, $p, $x)
+
+prp_asyp
+	foreach
+		ontology.triple($p, "rdf:type", "owl:AsymmetricProperty")
+		ontology.triple($x, $p, $y)
+		ontology.triple($y, $p, $x)
+	assert
+		python inconsistency(context, rule)
+
+prp_trp
+	foreach
+		ontology.triple($p, "rdf:type", "owl:TransitiveProperty")
+		ontology.triple($x, $p, $y)
+		ontology.triple($y, $p, $z)
+	assert
+		ontology.triple($x, $p, $z)
+
+prp_spo1
+	foreach
+		ontology.triple($p1, "rdfs:subPropertyOf", $p2)
+		ontology.triple($x, $p1, $y)
+	assert
+		ontology.triple($x, $p2, $y)
+
+prp_eqp1
+	foreach
+		ontology.triple($p1, "owl:equivalentProperty", $p2)
+		ontology.triple($x, $p1, $y)
+	assert
+		ontology.triple($x, $p2, $y)
+
+prp_eqp2
+	foreach
+		ontology.triple($p1, "owl:equivalentProperty", $p2)
+		ontology.triple($x, $p2, $y)
+	assert
+		ontology.triple($x, $p1, $y)
+
+prp_pdw
+	foreach
+		ontology.triple($p1, "owl:propertyDisjointWith", $p2)
+		ontology.triple($x, $p1, $y)
+		ontology.triple($x, $p2, $y)
+	assert
+		python inconsistency(context, rule)
+
+prp_inv1
+	foreach
+		ontology.triple($p1, "owl:inverseOf", $p2)
+		ontology.triple($x, $p1, $y)
+	assert
+		ontology.triple($y, $p2, $x)
+
+prp_inv2
+	foreach
+		ontology.triple($p1, "owl:inverseOf", $p2)
+		ontology.triple($x, $p2, $y)
+	assert
+		ontology.triple($y, $p1, $x)
+
+# The Semantics of Classes
+cls_thing
+	assert
+		ontology.triple("owl:Thing", "rdf:type", "owl:Class")
+
+cls_nothing1
+	assert
+		ontology.triple("owl:Nothing", "rdf:type", "owl:Class")
+
+cls_nothing2
+	foreach
+		ontology.triple($x, "rdf:type", "owl:Nothing")
+	assert
+		python inconsistency(context, rule)
+
+# The Semantics of Class Axioms
+cax_sco
+	foreach
+		ontology.triple($c1, "rdfs:subClassOf", $c2)
+		ontology.triple($x, "rdf:type", $c1)
+	assert
+		ontology.triple($x, "rdf:type", $c2)
+
+cax_eqc1
+	foreach
+		ontology.triple($c1, "owl:equivalentClass", $c2)
+		ontology.triple($x, "rdf:type", $c1)
+	assert
+		ontology.triple($x, "rdf:type", $c2)
+
+cax_eqc2
+	foreach
+		ontology.triple($c1, "owl:equivalentClass", $c2)
+		ontology.triple($x, "rdf:type", $c2)
+	assert
+		ontology.triple($x, "rdf:type", $c1)
+
+cax_dw
+	foreach
+		ontology.triple($c1, "owl:disjointWith", $c2)
+		ontology.triple($x, "rdf:type", $c1)
+		ontology.triple($x, "rdf:type", $c2)
+	assert
+		python inconsistency(context, rule)
+
+# The Semantics of Schema Vocabulary 
+
+scm_sco
+	foreach
+		ontology.triple($c1, "rdfs:subClassOf", $c2)
+		ontology.triple($c2, "rdfs:subClassOf", $c3)
+	assert
+		ontology.triple($c1, "rdfs:subClassOf", $c3)
+
+scm_eqc1
+	foreach
+		ontology.triple($c1, "owl:equivalentClass", $c2)
+	assert
+		ontology.triple($c1, "rdfs:subClassOf", $c2)
+		ontology.triple($c2, "rdfs:subClassOf", $c1)
+
+scm_eqc2
+	foreach
+		ontology.triple($c1, "rdfs:subClassOf", $c2)
+		ontology.triple($c2, "rdfs:subClassOf", $c1)
+	assert
+		ontology.triple($c1, "owl:equivalentClass", $c2)
+
+# scm_op
+# 	foreach
+# 		ontology.triple($p, "rdf:type", "owl:ObjectProperty")
+# 	assert
+# 		ontology.triple($p, "rdfs:subPropertyOf", $p)
+# 		ontology.triple($p, "owl:equivalentProperty", $p) 
+
+scm_dp
+	foreach
+		ontology.triple($p, "rdf:type", "owl:DatatypeProperty")
+	assert
+		ontology.triple($p, "rdfs:subPropertyOf", $p)
+		ontology.triple($p, "owl:equivalentProperty", $p)
+
+scm_spo
+	foreach
+		ontology.triple($p1, "rdfs:subPropertyOf", $p2)
+		ontology.triple($p2, "rdfs:subPropertyOf", $p3)
+	assert
+		ontology.triple($p1, "rdfs:subPropertyOf", $p3) 
+
+scm_eqp1
+	foreach
+		ontology.triple($p1, "owl:equivalentProperty", $p2)
+	assert
+		ontology.triple($p1, "rdfs:subPropertyOf", $p2)
+		ontology.triple($p2, "rdfs:subPropertyOf", $p1)
+
+scm_eqp2
+	foreach
+		ontology.triple($p1, "rdfs:subPropertyOf", $p2)
+		ontology.triple($p2, "rdfs:subPropertyOf", $p1)
+	assert
+		ontology.triple($p1, "owl:equivalentProperty", $p2)
+
+scm_dom1
+	foreach
+		ontology.triple($p, "rdfs:domain", $c1)
+		ontology.triple($c1, "rdfs:subClassOf", $c2)
+	assert
+		ontology.triple($p, "rdfs:domain", $c2)
+
+scm_dom2
+	foreach
+		ontology.triple($p2, "rdfs:domain", $c)
+		ontology.triple($p1, "rdfs:subPropertyOf", $p2)
+	assert
+		ontology.triple($p1, "rdfs:domain", $c)
+
+scm_rng1
+	foreach
+		ontology.triple($p, "rdfs:range", $c1)
+		ontology.triple($c1, "rdfs:subClassOf", $c2)
+	assert
+		ontology.triple($p, "rdfs:range", $c2)
+
+scm_rng2
+	foreach
+		ontology.triple($p2, "rdfs:range", $c)
+		ontology.triple($p1, "rdfs:subPropertyOf", $p2)
+	assert
+		ontology.triple($p1, "rdfs:range", $c)
+
+# The Semantics of Datatypes --- TODO
+
+fc_extras
+	def inconsistency(context, rule):
+		# print context.dump()
+		# print context.lookup(rule.foreach_patterns(0)[0])
+
+		s = '{ '
+
+		for f in range(0, len(rule.foreach_facts)):
+			s = s + '<' + \
+				rule.foreach_patterns(f)[0].as_data(context) + ' ' + \
+				rule.foreach_patterns(f)[1].as_data(context) + ' ' + \
+				rule.foreach_patterns(f)[2].as_data(context) + \
+			'> '
+		
+		s = s + '}'
+		
+		raise Exception(s)
