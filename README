@@ -1,3 +1,13 @@
 An OWL-LD/RL reasoner written in Python using rdflib and PyKE.
 
 Tested with rdflib 4.0.1 and PyKE 1.1.1.
+
+Examples of running the program:
+
+1) with the LD rule base
+
+python pyoner.py test.ttl result.ttl LD
+
+2) with the RL rule base
+
+python pyoner.py test.ttl result.ttl RL
