@@ -2,4 +2,5 @@ compiled_krb/
 *.pyc
 *.xml
 *.ttl
+*.bkp
 !test.ttl
