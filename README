@@ -1,0 +1,3 @@
+An OWL-LD reasoner written in Python using rdflib and PyKE.
+
+Tested with rdflib 4.0.1 and PyKE 1.1.1.

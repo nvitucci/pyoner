@@ -1,0 +1,7 @@
+Is it correct to use the form
+
+triple($c1, "rdfs:subClassOf", $c2)
+
+or is it better to use something like this?
+
+subClassOf($c1, $c2)
