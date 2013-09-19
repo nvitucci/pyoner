@@ -52,6 +52,11 @@ eq_diff1
 		python inconsistency(context, rule)
 
 # eq_diff2 TODO
+#	foreach
+#		ontology.triple($x, "rdf:type", "owl:AllDifferent")
+#		ontology.triple($x, "owl:members", $y)
+#	assert
+#		python inconsistency(context, rule)
 
 # eq_diff3 TODO
 
@@ -323,7 +328,22 @@ cls_maxqc4
 	assert
 		ontology.triple($y1, "owl:sameAs", $y2) 
 
-# cls_oo TODO
+# cls_oo is implemented with two rules
+
+cls_oo_1
+	foreach
+		ontology.triple($c, "owl:oneOf", $x)
+	assert
+		ontology.triple($c, "pyoner:_oneOf", $x)
+
+cls_oo_2
+	foreach
+		ontology.triple($c, "pyoner:_oneOf", $x)
+ 		ontology.triple($x, "rdf:first", $e1)
+ 		ontology.triple($x, "rdf:rest", $z2) 
+	assert
+		ontology.triple($e1, "rdf:type", $c)
+ 		ontology.triple($c, "pyoner:_unionOf", $z2)
 
 # The Semantics of Class Axioms
 cax_sco
