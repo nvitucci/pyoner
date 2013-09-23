@@ -51,14 +51,40 @@ eq_diff1
 	assert
 		python inconsistency(context, rule)
 
-# eq_diff2 TODO
-#	foreach
-#		ontology.triple($x, "rdf:type", "owl:AllDifferent")
-#		ontology.triple($x, "owl:members", $y)
-#	assert
-#		python inconsistency(context, rule)
+# eq_diff2 and eq_diff3 are implemented using three different rules (the first is common)
 
-# eq_diff3 TODO
+eq_diff2_1 
+	foreach
+		ontology.triple($x, "rdf:type", "owl:AllDifferent")
+		ontology.triple($x, "owl:members", $y)
+	assert
+		ontology.triple($x, "pyoner:_AllDifferentPart", $y)
+
+eq_diff3_1 
+	foreach
+		ontology.triple($x, "rdf:type", "owl:AllDifferent")
+		ontology.triple($x, "owl:distinctMembers", $y)
+	assert
+		ontology.triple($x, "pyoner:_AllDifferentPart", $y)
+
+eq_alldiff1
+	foreach
+		ontology.triple($x, "pyoner:_AllDifferentPart", $y)
+		ontology.triple($y, "rdf:rest", $z2)
+	assert
+		ontology.triple($x, "pyoner:_AllDifferentPart", $z2)
+
+eq_alldiff2
+	foreach
+		ontology.triple($x, "pyoner:_AllDifferentPart", $y)
+		ontology.triple($x, "pyoner:_AllDifferentPart", $z)
+		ontology.triple($y, "rdf:first", $e1)
+		ontology.triple($z, "rdf:first", $f1)
+		ontology.triple($e1, "owl:sameAs", $f1)
+	require
+		check $e1 != $f1
+	assert
+		python inconsistency(context, rule)
 
 # The Semantics of Axioms about Properties
 
@@ -157,7 +183,35 @@ prp_pdw
 	assert
 		python inconsistency(context, rule)
 
-# prp_adp TODO
+# prp_adp uses the 3 following rules
+
+prp_adp_1 
+	foreach
+		ontology.triple($x, "rdf:type", "owl:AllDisjointProperties")
+		ontology.triple($x, "owl:members", $y)
+	assert
+		ontology.triple($x, "pyoner:_AllDisjointProperties", $y)
+
+prp_adp_2
+	foreach
+		ontology.triple($x, "pyoner:_AllDisjointProperties", $y)
+		ontology.triple($y, "rdf:rest", $z2)
+	assert
+		ontology.triple($x, "pyoner:_AllDisjointProperties", $z2)
+
+prp_adp_3
+	foreach
+		ontology.triple($x, "pyoner:_AllDisjointProperties", $y)
+		ontology.triple($x, "pyoner:_AllDisjointProperties", $z)
+		ontology.triple($y, "rdf:first", $e1)
+		ontology.triple($z, "rdf:first", $f1)
+		ontology.triple($a, $e1, $b)
+		ontology.triple($a, $f1, $b)
+		# ontology.triple($e1, "owl:propertyDisjointWith", $f1)
+	require
+		check $e1 != $f1
+	assert
+		python inconsistency(context, rule)
 
 prp_inv1
 	foreach
@@ -329,6 +383,7 @@ cls_maxqc4
 		ontology.triple($y1, "owl:sameAs", $y2) 
 
 # cls_oo is implemented with two rules
+# TODO: does it need a constraint on != rdf:nil ?
 
 cls_oo_1
 	foreach
