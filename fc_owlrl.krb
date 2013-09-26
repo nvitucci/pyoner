@@ -262,11 +262,62 @@ cls_nothing2
 	assert
 		python inconsistency(context, rule)
 
-# cls_int1 TODO
+# cls_int1: uses the following rules 
+# TODO CHECK
 
-# cls_int2 TODO
+cls_int1_1
+	foreach
+		ontology.triple($c, "owl:intersectionOf", $x)
+		ontology.triple($y, "pyoner:_belongsToAll", $x)
+	assert
+		ontology.triple($y, "rdf:type", $c)
 
-# cls_uni TODO
+cls_int1_2
+	foreach
+		ontology.triple($x, "rdf:first", $e1)
+		ontology.triple($x, "rdf:rest", "rdf:nil")
+		ontology.triple($y, "rdf:type", $e1)
+	assert
+		ontology.triple($y, "pyoner:_belongsToAll", $x)
+
+cls_int1_3
+	foreach
+		ontology.triple($x, "rdf:first", $e1)
+		ontology.triple($x, "rdf:rest", $z2)
+		ontology.triple($y, "rdf:type", $e1)
+		ontology.triple($y, "pyoner:_belongsToAll", $z2)
+	assert
+		ontology.triple($y, "pyoner:_belongsToAll", $x)
+
+# cls_int2: uses the following rule
+# TODO CHECK
+
+cls_int2
+	foreach
+		ontology.triple($c, "owl:intersectionOf", $x)
+		ontology.triple($y, "rdf:type", $c)
+	assert
+		ontology.triple($y, "pyoner:_belongsToAll", $x)
+
+# cls_uni
+# TODO CHECK
+
+cls_uni_1
+	foreach
+		ontology.triple($c, "owl:unionOf", $x)
+		ontology.triple($y, "pyoner:_belongsToAny", $x)
+	assert
+		ontology.triple($y, "rdf:type", $c)
+
+cls_uni_2
+	foreach
+		ontology.triple($x, "rdf:first", $e1)
+		ontology.triple($x, "rdf:rest", $z2)
+		ontology.triple($y, "rdf:type", $e1)
+		# ontology.triple($y, "pyoner:_belongsToAny", $z2)
+	assert
+		ontology.triple($y, "pyoner:_belongsToAny", $x)
+
 
 cls_com
 	foreach
