@@ -1,0 +1,675 @@
+# Rules for the OWL-RL profile
+
+# The Semantics of Equality
+
+# eq_ref
+#	 foreach
+#		 test_ontology.triple($s, $p, $o)
+#	 assert
+#		 test_ontology.triple($s, "owl:sameAs", $s)
+#		 test_ontology.triple($p, "owl:sameAs", $p)
+#		 test_ontology.triple($o, "owl:sameAs", $o)
+
+eq_sym
+	foreach
+		test_ontology.triple($x, "owl:sameAs", $y)
+	assert
+		test_ontology.triple($y, "owl:sameAs", $x)
+
+eq_trans
+	foreach
+		test_ontology.triple($x, "owl:sameAs", $y)
+		test_ontology.triple($y, "owl:sameAs", $z)
+	assert
+		test_ontology.triple($x, "owl:sameAs", $z)
+
+eq_rep_s
+	foreach
+		test_ontology.triple($s1, "owl:sameAs", $s2)
+		test_ontology.triple($s1, $p, $o)
+	assert
+		test_ontology.triple($s2, $p, $o)
+
+eq_rep_p
+	foreach
+		test_ontology.triple($p1, "owl:sameAs", $p2)
+		test_ontology.triple($s, $p1, $o)
+	assert
+		test_ontology.triple($s, $p2, $o)
+
+eq_rep_o
+	foreach
+		test_ontology.triple($o1, "owl:sameAs", $o2)
+		test_ontology.triple($s, $p, $o1)
+	assert
+		test_ontology.triple($s, $p, $o2)
+
+eq_diff1
+	foreach
+		test_ontology.triple($x, "owl:sameAs", $y)
+		test_ontology.triple($x, "owl:differentFrom", $y)
+	assert
+		python inconsistency(context, rule)
+
+eq_diff2
+	foreach
+		test_ontology.triple($x, "rdf:type", "owl:AllDifferent")
+		test_ontology.triple($x, "owl:members", $y)
+		test_ontology.triple($y, "pyoner:_list", $l)
+		$e in $l
+		$f in $l
+		check $e != $f
+		test_ontology.triple($e, "owl:sameAs", $f)
+	assert
+		python inconsistency(context, rule)
+
+eq_diff3
+	foreach
+		test_ontology.triple($x, "rdf:type", "owl:AllDifferent")
+		test_ontology.triple($x, "owl:distinctMembers", $y)
+		test_ontology.triple($y, "pyoner:_list", $l)
+		$e in $l
+		$f in $l
+		check $e != $f
+		test_ontology.triple($e, "owl:sameAs", $f)
+	assert
+		python inconsistency(context, rule)
+
+# The Semantics of Axioms about Properties
+
+# prp_ap ???
+#	 assert
+#		 test_ontology.triple(ap, "rdf:type", "owl:AnnotationProperty") # for each built_in annotation property of OWL 2 RL
+
+prp_dom
+	foreach
+		test_ontology.triple($p, "rdfs:domain", $c)
+		test_ontology.triple($x, $p, $y)
+	assert
+		test_ontology.triple($x, "rdf:type", $c)
+
+prp_rng
+	foreach
+		test_ontology.triple($p, "rdfs:range", $c)
+		test_ontology.triple($x, $p, $y)
+	assert
+		test_ontology.triple($y, "rdf:type", $c)
+
+prp_fp
+	foreach
+		test_ontology.triple($p, "rdf:type", "owl:FunctionalProperty")
+		test_ontology.triple($x, $p, $y1)
+		test_ontology.triple($x, $p, $y2)
+	assert
+		test_ontology.triple($y1, "owl:sameAs", $y2)
+
+prp_ifp
+	foreach
+		test_ontology.triple($p, "rdf:type", "owl:InverseFunctionalProperty")
+		test_ontology.triple($x1, $p, $y)
+		test_ontology.triple($x2, $p, $y)
+	assert
+		test_ontology.triple($x1, "owl:sameAs", $x2)
+
+prp_irp
+	foreach
+		test_ontology.triple($p, "rdf:type", "owl:IrreflexiveProperty")
+		test_ontology.triple($x, $p, $x)
+	assert
+		python inconsistency(context, rule)
+
+prp_symp
+	foreach
+		test_ontology.triple($p, "rdf:type", "owl:SymmetricProperty")
+		test_ontology.triple($x, $p, $y)
+	assert
+		test_ontology.triple($y, $p, $x)
+
+prp_asyp
+	foreach
+		test_ontology.triple($p, "rdf:type", "owl:AsymmetricProperty")
+		test_ontology.triple($x, $p, $y)
+		test_ontology.triple($y, $p, $x)
+	assert
+		python inconsistency(context, rule)
+
+prp_trp
+	foreach
+		test_ontology.triple($p, "rdf:type", "owl:TransitiveProperty")
+		test_ontology.triple($x, $p, $y)
+		test_ontology.triple($y, $p, $z)
+	assert
+		test_ontology.triple($x, $p, $z)
+
+prp_spo1
+	foreach
+		test_ontology.triple($p1, "rdfs:subPropertyOf", $p2)
+		test_ontology.triple($x, $p1, $y)
+	assert
+		test_ontology.triple($x, $p2, $y)
+
+prp_spo2_1
+	foreach
+		test_ontology.triple($p, "owl:propertyChainAxiom", $x)
+		test_ontology.triple($x, "pyoner:_list", $l)
+		$p1 = $l[0]
+		test_ontology.triple($a, $p1, $b)
+		python ll = list($l)
+		$pr = makeTuple($l[1:], $a, $p)
+	assert
+		test_ontology.triple($b, "pyoner:_chain", $pr)
+
+prp_spo2_2
+	foreach
+		test_ontology.triple($x, "pyoner:_chain", $l)
+		check len($l) > 3
+		$p1 = $l[0]
+		$pr = $l[1:]
+		test_ontology.triple($x, $p1, $y)
+	assert
+		test_ontology.triple($y, "pyoner:_chain", $pr)
+
+prp_spo2_3
+	foreach
+		test_ontology.triple($x, "pyoner:_chain", $l)
+		check len($l) == 3
+		$p = $l[0]
+		$el = $l[1]
+		$f = $l[2]
+		test_ontology.triple($x, $p, $y)
+	assert
+		test_ontology.triple($el, $f, $y)
+
+prp_eqp1
+	foreach
+		test_ontology.triple($p1, "owl:equivalentProperty", $p2)
+		test_ontology.triple($x, $p1, $y)
+	assert
+		test_ontology.triple($x, $p2, $y)
+
+prp_eqp2
+	foreach
+		test_ontology.triple($p1, "owl:equivalentProperty", $p2)
+		test_ontology.triple($x, $p2, $y)
+	assert
+		test_ontology.triple($x, $p1, $y)
+
+prp_pdw
+	foreach
+		test_ontology.triple($p1, "owl:propertyDisjointWith", $p2)
+		test_ontology.triple($x, $p1, $y)
+		test_ontology.triple($x, $p2, $y)
+	assert
+		python inconsistency(context, rule)
+
+# prp_adp TODO check
+prp_adp
+	foreach
+		test_ontology.triple($x, "rdf:type", "owl:AllDisjointProperties")
+		test_ontology.triple($x, "owl:members", $y)
+		test_ontology.triple($y, "pyoner:_list", $l)
+		test_ontology.triple($u, $p1, $v)
+		test_ontology.triple($u, $p2, $v)
+		$p1 in $l
+		$p2 in $l
+		check $p1 != $p2
+	assert
+		python inconsistency(context, rule)
+
+prp_inv1
+	foreach
+		test_ontology.triple($p1, "owl:inverseOf", $p2)
+		test_ontology.triple($x, $p1, $y)
+	assert
+		test_ontology.triple($y, $p2, $x)
+
+prp_inv2
+	foreach
+		test_ontology.triple($p1, "owl:inverseOf", $p2)
+		test_ontology.triple($x, $p2, $y)
+	assert
+		test_ontology.triple($y, $p1, $x)
+
+prp_key
+	foreach
+		test_ontology.triple($c, "owl:hasKey", $u)
+		test_ontology.triple($u, "pyoner:_list", $l)
+		test_ontology.triple($x, "rdf:type", $c)
+		test_ontology.triple($y, "rdf:type", $c)
+		check $x != $y
+		forall
+			$p in $l
+		require
+			test_ontology.triple($x, $p, $z)
+			test_ontology.triple($y, $p, $z)
+	assert
+		test_ontology.triple($x, "owl:sameAs", $y)
+
+prp_npa1
+	foreach
+		test_ontology.triple($x, "owl:sourceIndividual", $i1)
+		test_ontology.triple($x, "owl:assertionProperty", $p)
+		test_ontology.triple($x, "owl:targetIndividual", $i2)
+		test_ontology.triple($i1, $p, $i2)
+	assert
+		python inconsistency(context, rule)
+
+prp_npa2
+	foreach
+		test_ontology.triple($x, "owl:sourceIndividual", $i)
+		test_ontology.triple($x, "owl:assertionProperty", $p)
+		test_ontology.triple($x, "owl:targetValue", $lt)
+		test_ontology.triple($i1, $p, $lt)
+	assert
+		python inconsistency(context, rule)
+
+# The Semantics of Classes
+cls_thing
+	assert
+		test_ontology.triple("owl:Thing", "rdf:type", "owl:Class")
+
+cls_nothing1
+	assert
+		test_ontology.triple("owl:Nothing", "rdf:type", "owl:Class")
+
+cls_nothing2
+	foreach
+		test_ontology.triple($x, "rdf:type", "owl:Nothing")
+	assert
+		python inconsistency(context, rule)
+
+# cls_int1 TODO check
+cls_int1
+	foreach
+		test_ontology.triple($c, "owl:intersectionOf", $x)
+		test_ontology.triple($x, "pyoner:_list", $l)
+		test_ontology.triple($y, "rdf:type", $c1) # trick needed, otherwise $y is not bound
+		$c1 in $l
+		forall
+			$ci in $l
+		require
+			test_ontology.triple($y, "rdf:type", $ci)
+	assert
+		test_ontology.triple($y, "rdf:type", $c)
+
+# cls_int2 TODO check
+cls_int2
+	foreach
+		test_ontology.triple($c, "owl:intersectionOf", $x)
+		test_ontology.triple($y, "rdf:type", $c)
+		test_ontology.triple($x, "pyoner:_list", $l)
+		$ci in $l
+	assert
+		test_ontology.triple($y, "rdf:type", $ci)
+
+# cls_uni TODO check
+cls_uni
+	foreach
+		test_ontology.triple($c, "owl:unionOf", $x)
+		test_ontology.triple($x, "pyoner:_list", $l)
+		$ci in $l
+		test_ontology.triple($y, "rdf:type", $ci)
+	assert
+		test_ontology.triple($y, "rdf:type", $c)
+
+cls_com
+	foreach
+		test_ontology.triple($c1, "owl:complementOf", $c2)
+		test_ontology.triple($x, "rdf:type", $c1)
+		test_ontology.triple($x, "rdf:type", $c2)
+	assert
+		python inconsistency(context, rule)
+
+cls_svf1
+	foreach
+		test_ontology.triple($x, "owl:someValuesFrom", $y)
+		test_ontology.triple($x, "owl:onProperty", $p)
+		test_ontology.triple($u, $p, $v)
+		test_ontology.triple($v, "rdf:type", $y)
+	assert
+		test_ontology.triple($u, "rdf:type", $x)
+
+cls_svf2
+	foreach
+		test_ontology.triple($x, "owl:someValuesFrom", "owl:Thing")
+		test_ontology.triple($x, "owl:onProperty", $p)
+		test_ontology.triple($u, $p, $v)
+	assert
+		test_ontology.triple($u, "rdf:type", $x)
+
+cls_avf
+	foreach
+		test_ontology.triple($x, "owl:allValuesFrom", $y)
+		test_ontology.triple($x, "owl:onProperty", $p)
+		test_ontology.triple($u, "rdf:type", $x)
+		test_ontology.triple($u, $p, $v)
+	assert
+		test_ontology.triple($v, "rdf:type", $y)
+
+cls_hv1
+	foreach
+		test_ontology.triple($x, "owl:hasValue", $y)
+		test_ontology.triple($x, "owl:onProperty", $p)
+		test_ontology.triple($u, "rdf:type", $x)
+	assert
+		test_ontology.triple($u, $p, $y)
+
+cls_hv2
+	foreach
+		test_ontology.triple($x, "owl:hasValue", $y)
+		test_ontology.triple($x, "owl:onProperty", $p)
+		test_ontology.triple($u, $p, $y)
+	assert
+		test_ontology.triple($u, "rdf:type", $x)
+
+cls_maxc1
+	foreach
+		test_ontology.triple($x, "owl:maxCardinality", "\"0\"^^xsd:nonNegativeInteger")
+		test_ontology.triple($x, "owl:onProperty", $p)
+		test_ontology.triple($u, "rdf:type", $x)
+		test_ontology.triple($u, $p, $y)
+	assert
+		python inconsistency(context, rule)
+
+cls_maxc2
+	foreach
+		test_ontology.triple($x, "owl:maxCardinality", "\"1\"^^xsd:nonNegativeInteger")
+		test_ontology.triple($x, "owl:onProperty", $p)
+		test_ontology.triple($u, "rdf:type", $x)
+		test_ontology.triple($u, $p, $y1)
+		test_ontology.triple($u, $p, $y2)
+	assert
+		test_ontology.triple($y1, "owl:sameAs", $y2)
+
+cls_maxqc1
+	foreach
+		test_ontology.triple($x, "owl:maxQualifiedCardinality", "\"0\"^^xsd:nonNegativeInteger")
+		test_ontology.triple($x, "owl:onProperty", $p)
+		test_ontology.triple($x, "owl:onClass", $c)
+		test_ontology.triple($u, "rdf:type", $x)
+		test_ontology.triple($u, $p, $y)
+		test_ontology.triple($y, "rdf:type", $c)
+	assert
+		python inconsistency(context, rule)
+
+cls_maxqc2
+	foreach
+		test_ontology.triple($x, "owl:maxQualifiedCardinality", "\"0\"^^xsd:nonNegativeInteger")
+		test_ontology.triple($x, "owl:onProperty", $p)
+		test_ontology.triple($x, "owl:onClass", "owl:Thing")
+		test_ontology.triple($u, "rdf:type", $x)
+		test_ontology.triple($u, $p, $y)
+	assert
+		python inconsistency(context, rule)
+
+cls_maxqc3
+	foreach
+		test_ontology.triple($x, "owl:maxQualifiedCardinality", "\"1\"^^xsd:nonNegativeInteger")
+		test_ontology.triple($x, "owl:onProperty", $p)
+		test_ontology.triple($x, "owl:onClass", $c)
+		test_ontology.triple($u, "rdf:type", $x)
+		test_ontology.triple($u, $p, $y1)
+		test_ontology.triple($y1, "rdf:type", $c)
+		test_ontology.triple($u, $p, $y2)
+		test_ontology.triple($y2, "rdf:type", $c)
+	assert
+		test_ontology.triple($y1, "owl:sameAs", $y2)
+
+cls_maxqc4
+	foreach
+		test_ontology.triple($x, "owl:maxQualifiedCardinality", "\"1\"^^xsd:nonNegativeInteger")
+		test_ontology.triple($x, "owl:onProperty", $p)
+		test_ontology.triple($x, "owl:onClass", "owl:Thing")
+		test_ontology.triple($u, "rdf:type", $x)
+		test_ontology.triple($u, $p, $y1)
+		test_ontology.triple($u, $p, $y2)
+	assert
+		test_ontology.triple($y1, "owl:sameAs", $y2)
+
+# cls_oo TODO check
+cls_oo
+	foreach
+		test_ontology.triple($c, "owl:oneOf", $x)
+		test_ontology.triple($x, "pyoner:_list", $l)
+		$yi in $l
+	assert
+		test_ontology.triple($yi, "rdf:type", $c)
+
+cax_sco
+	foreach
+		test_ontology.triple($c1, "rdfs:subClassOf", $c2)
+		test_ontology.triple($x, "rdf:type", $c1)
+	assert
+		test_ontology.triple($x, "rdf:type", $c2)
+
+cax_eqc1
+	foreach
+		test_ontology.triple($c1, "owl:equivalentClass", $c2)
+		test_ontology.triple($x, "rdf:type", $c1)
+	assert
+		test_ontology.triple($x, "rdf:type", $c2)
+
+cax_eqc2
+	foreach
+		test_ontology.triple($c1, "owl:equivalentClass", $c2)
+		test_ontology.triple($x, "rdf:type", $c2)
+	assert
+		test_ontology.triple($x, "rdf:type", $c1)
+
+cax_dw
+	foreach
+		test_ontology.triple($c1, "owl:disjointWith", $c2)
+		test_ontology.triple($x, "rdf:type", $c1)
+		test_ontology.triple($x, "rdf:type", $c2)
+	assert
+		python inconsistency(context, rule)
+
+# cax_adc TODO check
+cax_adc
+	foreach
+		test_ontology.triple($x, "rdf:type", "owl:AllDisjointClasses")
+		test_ontology.triple($x, "owl:members", $y)
+		test_ontology.triple($y, "pyoner:_list", $l)
+		test_ontology.triple($z, "rdf:type", $c1)
+		test_ontology.triple($z, "rdf:type", $c2)
+		$c1 in $l
+		$c2 in $l
+		check $c1 != $c2
+	assert
+		python inconsistency(context, rule)
+
+# The Semantics of Schema Vocabulary
+
+scm_cls
+	foreach
+		test_ontology.triple($c, "rdf:type", "owl:Class")
+	assert
+		test_ontology.triple($c, "rdfs:subClassOf", $c)
+		test_ontology.triple($c, "owl:equivalentClass", $c)
+		test_ontology.triple($c, "rdfs:subClassOf", "owl:Thing")
+		test_ontology.triple("owl:Nothing", "rdfs:subClassOf", $c)
+
+scm_sco
+	foreach
+		test_ontology.triple($c1, "rdfs:subClassOf", $c2)
+		test_ontology.triple($c2, "rdfs:subClassOf", $c3)
+	assert
+		test_ontology.triple($c1, "rdfs:subClassOf", $c3)
+
+scm_eqc1
+	foreach
+		test_ontology.triple($c1, "owl:equivalentClass", $c2)
+	assert
+		test_ontology.triple($c1, "rdfs:subClassOf", $c2)
+		test_ontology.triple($c2, "rdfs:subClassOf", $c1)
+
+scm_eqc2
+	foreach
+		test_ontology.triple($c1, "rdfs:subClassOf", $c2)
+		test_ontology.triple($c2, "rdfs:subClassOf", $c1)
+	assert
+		test_ontology.triple($c1, "owl:equivalentClass", $c2)
+
+# scm_op
+#	 foreach
+#		 test_ontology.triple($p, "rdf:type", "owl:ObjectProperty")
+#	 assert
+#		 test_ontology.triple($p, "rdfs:subPropertyOf", $p)
+#		 test_ontology.triple($p, "owl:equivalentProperty", $p)
+
+scm_dp
+	foreach
+		test_ontology.triple($p, "rdf:type", "owl:DatatypeProperty")
+	assert
+		test_ontology.triple($p, "rdfs:subPropertyOf", $p)
+		test_ontology.triple($p, "owl:equivalentProperty", $p)
+
+scm_spo
+	foreach
+		test_ontology.triple($p1, "rdfs:subPropertyOf", $p2)
+		test_ontology.triple($p2, "rdfs:subPropertyOf", $p3)
+	assert
+		test_ontology.triple($p1, "rdfs:subPropertyOf", $p3)
+
+scm_eqp1
+	foreach
+		test_ontology.triple($p1, "owl:equivalentProperty", $p2)
+	assert
+		test_ontology.triple($p1, "rdfs:subPropertyOf", $p2)
+		test_ontology.triple($p2, "rdfs:subPropertyOf", $p1)
+
+scm_eqp2
+	foreach
+		test_ontology.triple($p1, "rdfs:subPropertyOf", $p2)
+		test_ontology.triple($p2, "rdfs:subPropertyOf", $p1)
+	assert
+		test_ontology.triple($p1, "owl:equivalentProperty", $p2)
+
+scm_dom1
+	foreach
+		test_ontology.triple($p, "rdfs:domain", $c1)
+		test_ontology.triple($c1, "rdfs:subClassOf", $c2)
+	assert
+		test_ontology.triple($p, "rdfs:domain", $c2)
+
+scm_dom2
+	foreach
+		test_ontology.triple($p2, "rdfs:domain", $c)
+		test_ontology.triple($p1, "rdfs:subPropertyOf", $p2)
+	assert
+		test_ontology.triple($p1, "rdfs:domain", $c)
+
+scm_rng1
+	foreach
+		test_ontology.triple($p, "rdfs:range", $c1)
+		test_ontology.triple($c1, "rdfs:subClassOf", $c2)
+	assert
+		test_ontology.triple($p, "rdfs:range", $c2)
+
+scm_rng2
+	foreach
+		test_ontology.triple($p2, "rdfs:range", $c)
+		test_ontology.triple($p1, "rdfs:subPropertyOf", $p2)
+	assert
+		test_ontology.triple($p1, "rdfs:range", $c)
+
+scm_hv
+	foreach
+		test_ontology.triple($c1, "owl:hasValue", $i)
+		test_ontology.triple($c1, "owl:onProperty", $p1)
+		test_ontology.triple($c2, "owl:hasValue", $i)
+		test_ontology.triple($c2, "owl:onProperty", $p2)
+		test_ontology.triple($p1, "rdfs:subPropertyOf", $p2)
+	assert
+		test_ontology.triple($c1, "rdfs:subClassOf", $c2)
+
+scm_svf1
+	foreach
+		test_ontology.triple($c1, "owl:someValuesFrom", $y1)
+		test_ontology.triple($c1, "owl:onProperty", $p)
+		test_ontology.triple($c2, "owl:someValuesFrom", $y2)
+		test_ontology.triple($c2, "owl:onProperty", $p)
+		test_ontology.triple($y1, "rdfs:subClassOf", $y2)
+	assert
+		test_ontology.triple($c1, "rdfs:subClassOf", $c2)
+
+scm_svf2
+	foreach
+		test_ontology.triple($c1, "owl:someValuesFrom", $y)
+		test_ontology.triple($c1, "owl:onProperty", $p1)
+		test_ontology.triple($c2, "owl:someValuesFrom", $y)
+		test_ontology.triple($c2, "owl:onProperty", $p2)
+		test_ontology.triple($p1, "rdfs:subPropertyOf", $p2)
+	assert
+		test_ontology.triple($c1, "rdfs:subClassOf", $c2)
+
+scm_avf1
+	foreach
+		test_ontology.triple($c1, "owl:allValuesFrom", $y1)
+		test_ontology.triple($c1, "owl:onProperty", $p)
+		test_ontology.triple($c2, "owl:allValuesFrom", $y2)
+		test_ontology.triple($c2, "owl:onProperty", $p)
+		test_ontology.triple($y1, "rdfs:subClassOf", $y2)
+	assert
+		test_ontology.triple($c1, "rdfs:subClassOf", $c2)
+
+scm_avf2
+	foreach
+		test_ontology.triple($c1, "owl:allValuesFrom", $y)
+		test_ontology.triple($c1, "owl:onProperty", $p1)
+		test_ontology.triple($c2, "owl:allValuesFrom", $y)
+		test_ontology.triple($c2, "owl:onProperty", $p2)
+		test_ontology.triple($p1, "rdfs:subPropertyOf", $p2)
+	assert
+		test_ontology.triple($c2, "rdfs:subClassOf", $c1)
+
+# scm_int TODO check
+scm_int
+	foreach
+		test_ontology.triple($c, "owl:intersectionOf", $x)
+		test_ontology.triple($x, "pyoner:_list", $l)
+		$ci in $l
+	assert
+		test_ontology.triple($c, "rdfs:subClassOf", $ci)
+
+# scm_uni TODO check
+scm_uni
+	foreach
+		test_ontology.triple($c, "owl:unionOf", $x)
+		test_ontology.triple($x, "pyoner:_list", $l)
+		$ci in $l
+	assert
+		test_ontology.triple($ci, "rdfs:subClassOf", $c)
+
+
+fc_extras
+	def inconsistency(context, rule):
+		# print context.dump()
+		# print context.lookup(rule.foreach_patterns(0)[0])
+
+		s = '{ '
+
+		for f in range(0, len(rule.foreach_facts)):
+			s = s + '<' + \
+				str(rule.foreach_patterns(f)[0].as_data(context)) + ' ' + \
+				str(rule.foreach_patterns(f)[1].as_data(context)) + ' ' + \
+				str(rule.foreach_patterns(f)[2].as_data(context)) + \
+			'> '
+
+		s = s + '}'
+
+		raise Exception(s)
+
+	def makeTuple(t, *args):
+		res = list(t)
+		for i in args:
+			res.append(i)
+
+		return tuple(res)
+
+	def printList(l, m):
+		print m + ': ### ' + str(l)
+
+	def printEl(e):
+		print '# ' + e
+			

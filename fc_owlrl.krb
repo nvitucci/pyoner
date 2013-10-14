@@ -81,7 +81,6 @@ eq_alldiff2
 		ontology.triple($y, "rdf:first", $e1)
 		ontology.triple($z, "rdf:first", $f1)
 		ontology.triple($e1, "owl:sameAs", $f1)
-	require
 		check $e1 != $f1
 	assert
 		python inconsistency(context, rule)
@@ -159,7 +158,11 @@ prp_spo1
 	assert
 		ontology.triple($x, $p2, $y)
 
-# prp_spo2 TODO
+# prp_spo2 uses these rules TODO
+#prp_spo2_1
+#	foreach
+#		ontology.triple($p, "owl:propertyChainAxiom", $x)
+#	assert	
 
 prp_eqp1
 	foreach
@@ -208,7 +211,6 @@ prp_adp_3
 		ontology.triple($a, $e1, $b)
 		ontology.triple($a, $f1, $b)
 		# ontology.triple($e1, "owl:propertyDisjointWith", $f1)
-	require
 		check $e1 != $f1
 	assert
 		python inconsistency(context, rule)
