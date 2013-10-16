@@ -8,7 +8,10 @@ def field_with_ns(f, nsmgr):
 	elif type(f) == rdflib.BNode:
 		return '_' + f.toPython()
 	else:
-		return '"' + f.toPython() + '"'
+		if type(f.toPython()) == int:
+			return str(f.toPython())
+		else:
+			return '"' + f.toPython() + '"'
 
 def triple_with_ns(t, nsmgr):
   t_ns = []
