@@ -6,4 +6,4 @@ compiled_krb/
 *.ttl
 *.bkp
 !test.ttl
-*.kfb
+ontologies/*.kfb
