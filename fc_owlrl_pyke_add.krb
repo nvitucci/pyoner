@@ -642,63 +642,9 @@ scm_uni
 		test_ontology.triple($ci, "rdfs:subClassOf", $c)
 
 ###
-# Additions
-#
-
-prp_mincard
-	foreach
-		test_ontology.triple($r, "rdf:type", "owl:Restriction")
-		test_ontology.triple($r, "owl:onProperty", $p)
-		test_ontology.triple($r, "owl:minCardinality", $c)
-		test_ontology.triple($d, "rdf:type", "owl:AllDifferent")
-		test_ontology.triple($d, "owl:distinctMembers", $m)
-		test_ontology.triple($m, "pyoner:_list", $l)
-		test_ontology.triple($x, $p, $a)
-		python matches = []
-		forall
-			$el in $l
-			test_ontology.triple($x, $p, $el)
-		require
-			python matches.append($el)
-		$matches = tuple(matches)
-		# check checkMinSize($matches, $c) # useless extra function?
-		check len($matches) >= int($c)
-	assert
-		# python printList($l, "alldiff")
-		test_ontology.triple($x, "rdf:type", $r)
-
-# prp_refl
-# 	foreach
-# 		test_ontology.triple($p, "rdf:type", "owl:ReflexiveProperty")
-# 		test_ontology.triple($a, "rdf:type", "owl:Thing")
-# 	assert
-# 		test_ontology.triple($a, $p, $a)
-# 
-# prp_top
-# 	foreach
-# 		test_ontology.triple($a, "rdf:type", "owl:Thing")
-# 		test_ontology.triple($b, "rdf:type", "owl:Thing")
-# 	assert
-# 		test_ontology.triple($a, "owl:topObjectProperty", $b)
-# 
-# def_top
-# 	assert
-# 		test_ontology.triple("owl:topObjectProperty", "rdf:type", "owl:ObjectProperty")
-# 
-# use_top
-# 	foreach
-# 		test_ontology.triple($p, "rdf:type", "owl:ObjectProperty")
-# 	assert
-# 		test_ontology.triple($p, "rdfs:subPropertyOf", "owl:topObjectProperty")
-	
-
-###
 # Extras
 
 fc_extras
-	def checkMinSize(l, s):
-		return len(l) >= int(s)
-
 	def inconsistency(context, rule):
 		# print context.dump()
 		# print context.lookup(rule.foreach_patterns(0)[0])
