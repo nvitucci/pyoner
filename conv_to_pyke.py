@@ -8,7 +8,7 @@ def field_with_ns(f, nsmgr):
 	elif type(f) == rdflib.BNode:
 		return '_' + f.toPython()
 	else:
-		if type(f.toPython()) == int:
+		if type(f.toPython()) in (int, bool):
 			return str(f.toPython())
 		else:
 			return '"' + f.toPython() + '"'
